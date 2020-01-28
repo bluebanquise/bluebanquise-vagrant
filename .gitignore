@@ -1,0 +1,6 @@
+### Vagrant ###
+# General
+.vagrant/*
+*/.vagrant/*
+### Vagrant Patch ###
+*.box
