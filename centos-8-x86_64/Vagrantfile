@@ -10,52 +10,60 @@ local_centos_iso = '~/Documents/Lab/CentOS-8.1.1911-x86_64-dvd1.iso'
 # Read YAML files with box details
 require 'yaml'
 # Managements
-managements_conf = YAML.load_file(File.join(File.dirname(__FILE__), '../../../resources/examples/simple_cluster/inventory/cluster/nodes/managements.yml'))
+managements_conf = YAML.load_file(File.join(File.dirname(__FILE__),
+ '../../../resources/examples/simple_cluster/inventory/cluster/nodes/managements.yml'))
 managements = managements_conf['mg_managements']['children']['equipment_typeM']['hosts']
 # Computes
-computes_conf = YAML.load_file(File.join(File.dirname(__FILE__), '../../../resources/examples/simple_cluster/inventory/cluster/nodes/computes.yml'))
+computes_conf = YAML.load_file(File.join(File.dirname(__FILE__),
+ '../../../resources/examples/simple_cluster/inventory/cluster/nodes/computes.yml'))
 computes = computes_conf['mg_computes']['children']['equipment_typeC']['hosts']
 # Logins
-logins_conf = YAML.load_file(File.join(File.dirname(__FILE__), '../../../resources/examples/simple_cluster/inventory/cluster/nodes/logins.yml'))
+logins_conf = YAML.load_file(File.join(File.dirname(__FILE__),
+ '../../../resources/examples/simple_cluster/inventory/cluster/nodes/logins.yml'))
 logins = logins_conf['mg_logins']['children']['equipment_typeL']['hosts']
 
 
 Vagrant.configure("2") do |config|
 
   ##### DEFINE MGMT VM #####
-  config.vm.define "management1", primary: true do |mgmt|
-    mgmt.vm.hostname = "management1"
-    mgmt.vm.box = "centos/8"
-    mgmt.vm.box_check_update = false
-    mgmt.vm.network :private_network,
-      :ip => managements['management1']['network_interfaces']['enp0s3']['ip4'],
-      :libvirt__dhcp_enabled => false,
-      :libvirt__forward_mode => "veryisolated",
-      :libvirt__netmask => "255.255.0.0",
-      :libvirt__network_address => "10.10.0.0",
-      :libvirt__network_name => managements['management1']['network_interfaces']['enp0s3']['network'],
-      :mac => managements['management1']['network_interfaces']['enp0s3']['mac']
-    mgmt.vm.network :private_network,
-      :ip => managements['management1']['network_interfaces']['ib0']['ip4'],
-      :libvirt__dhcp_enabled => false,
-      :libvirt__forward_mode => "veryisolated",
-      :libvirt__netmask => "255.255.0.0",
-      :libvirt__network_address => "10.20.0.0",
-      :libvirt__network_name => managements['management1']['network_interfaces']['ib0']['network']
-    mgmt.vm.provider :libvirt do |domain|
-      domain.cpus = 2
-      domain.machine_virtual_size = 25 # GB
-      domain.memory = 2048
-      domain.storage :file, :device => :cdrom, :path => File.expand_path(local_centos_iso)
-      domain.storage_pool_name = "lab"
-    end
+  managements.each do |management|
+    config.vm.define management[0], primary: true do |mgmt|
+      mgmt.vm.hostname = management[0]
+      mgmt.vm.box = "centos/8"
+      mgmt.vm.box_check_update = false
+      mgmt.vm.network :private_network,
+        :ip => management[1]['network_interfaces']['enp0s3']['ip4'],
+        :libvirt__dhcp_enabled => false,
+        :libvirt__forward_mode => "veryisolated",
+        :libvirt__netmask => "255.255.0.0",
+        :libvirt__network_address => "10.10.0.0",
+        :libvirt__network_name => management[1]['network_interfaces']['enp0s3']['network'],
+        :mac => management[1]['network_interfaces']['enp0s3']['mac']
+      mgmt.vm.network :private_network,
+        :ip => management[1]['network_interfaces']['ib0']['ip4'],
+        :libvirt__dhcp_enabled => false,
+        :libvirt__forward_mode => "veryisolated",
+        :libvirt__netmask => "255.255.0.0",
+        :libvirt__network_address => "10.20.0.0",
+        :libvirt__network_name => management[1]['network_interfaces']['ib0']['network']
+      mgmt.vm.provider :libvirt do |domain|
+        domain.cpus = 2
+        domain.machine_virtual_size = 25 # GB
+        domain.memory = 2048
+        domain.storage :file, :device => :cdrom, :path => File.expand_path(local_centos_iso)
+        domain.storage_pool_name = "lab"
+      end
 
-    # If a local bluebanquise repository is found, copy it to the mgmt host
-    if Dir.exist?(File.expand_path(local_bb_repo))
-        mgmt.vm.synced_folder File.expand_path(local_bb_repo), "/var/www/html/repositories/centos/8.1/x86_64/bluebanquise", type: "rsync"
-    end
+      # Bootstrap the first management node only
+      if management[0] == "management1"
+        # If a local bluebanquise repository is found, copy it to the mgmt host
+        if Dir.exist?(File.expand_path(local_bb_repo))
+          mgmt.vm.synced_folder File.expand_path(local_bb_repo), "/var/www/html/repositories/centos/8.1/x86_64/bluebanquise", type: "rsync"
+        end
 
-    mgmt.vm.provision "shell", path: "bootstrap-bb.sh"
+        mgmt.vm.provision "shell", path: "bootstrap-bb.sh"
+      end
+    end
   end
 
   ##### DEFINE COMPUTE VM #####
