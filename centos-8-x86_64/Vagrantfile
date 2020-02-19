@@ -4,8 +4,8 @@
 ENV['VAGRANT_DEFAULT_PROVIDER'] = 'libvirt'
 
 # Path to the local bluebanquise repository
-local_bb_repo = '~/Documents/Lab/bluebanquise'
-local_centos_iso = '~/Documents/Lab/CentOS-8.1.1911-x86_64-dvd1.iso'
+local_bb_repo = ENV['VAGRANT_BB_REPO'] || '~/Documents/Lab/bluebanquise'
+local_centos_iso = ENV['VAGRANT_BB_CENTOS_ISO'] || '~/Documents/Lab/CentOS-8.1.1911-x86_64-dvd1.iso'
 
 # Read YAML files with box details
 require 'yaml'
