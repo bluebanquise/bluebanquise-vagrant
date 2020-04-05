@@ -11,15 +11,15 @@ local_centos_iso = ENV['VAGRANT_BB_CENTOS_ISO'] || '~/Documents/Lab/CentOS-8.1.1
 require 'yaml'
 # Managements
 managements_conf = YAML.load_file(File.join(File.dirname(__FILE__),
- '../../../resources/examples/simple_cluster/inventory/cluster/nodes/managements.yml'))
+ '../examples/single_iceberg/inventory/cluster/nodes/managements.yml'))
 managements = managements_conf['mg_managements']['children']['equipment_typeM']['hosts']
 # Computes
 computes_conf = YAML.load_file(File.join(File.dirname(__FILE__),
- '../../../resources/examples/simple_cluster/inventory/cluster/nodes/computes.yml'))
+ '../examples/single_iceberg/inventory/cluster/nodes/computes.yml'))
 computes = computes_conf['mg_computes']['children']['equipment_typeC']['hosts']
 # Logins
 logins_conf = YAML.load_file(File.join(File.dirname(__FILE__),
- '../../../resources/examples/simple_cluster/inventory/cluster/nodes/logins.yml'))
+ '../examples/single_iceberg/inventory/cluster/nodes/logins.yml'))
 logins = logins_conf['mg_logins']['children']['equipment_typeL']['hosts']
 
 
