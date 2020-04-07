@@ -12,8 +12,9 @@ MAJOR_RELEASE=${RELEASE:0:1}
 MINOR_RELEASE=${RELEASE:0:3}
 ARCH=$(uname -i)
 
-echo "Install BlueBanquise"
-/usr/bin/git clone https://github.com/oxedions/bluebanquise /etc/bluebanquise
+echo "Install BlueBanquise and dependencies"
+/usr/bin/git clone https://github.com/bluebanquise/bluebanquise /etc/bluebanquise
+/usr/bin/dnf install clustershell -y
 
 echo "Setup the simple_cluster environment"
 # os repository
@@ -27,7 +28,7 @@ fi
 /usr/sbin/restorecon -Rv /var/www/html/repositories/${DISTRIBUTION}/${MINOR_RELEASE}/${ARCH}/bluebanquise
 
 # Copy the inventory
-/usr/bin/cp -a /etc/bluebanquise/resources/examples/simple_cluster/* /etc/bluebanquise/
+/usr/bin/cp -a /vagrant/examples/* /etc/bluebanquise/
 
 # Create software share for NFS
 /usr/bin/mkdir -p /opt/softwares

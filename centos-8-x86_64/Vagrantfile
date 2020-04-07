@@ -7,19 +7,22 @@ ENV['VAGRANT_DEFAULT_PROVIDER'] = 'libvirt'
 local_bb_repo = ENV['VAGRANT_BB_REPO'] || '~/Documents/Lab/bluebanquise'
 local_centos_iso = ENV['VAGRANT_BB_CENTOS_ISO'] || '~/Documents/Lab/CentOS-8.1.1911-x86_64-dvd1.iso'
 
+# Example profile (inventory + playbooks)
+profile = ENV['VAGRANT_BB_PROFILE'] || 'single_iceberg'
+
 # Read YAML files with box details
 require 'yaml'
 # Managements
 managements_conf = YAML.load_file(File.join(File.dirname(__FILE__),
- '../examples/single_iceberg/inventory/cluster/nodes/managements.yml'))
+ '../examples/' + profile + '/inventory/cluster/nodes/managements.yml'))
 managements = managements_conf['mg_managements']['children']['equipment_typeM']['hosts']
 # Computes
 computes_conf = YAML.load_file(File.join(File.dirname(__FILE__),
- '../examples/single_iceberg/inventory/cluster/nodes/computes.yml'))
+ '../examples/' + profile + '/inventory/cluster/nodes/computes.yml'))
 computes = computes_conf['mg_computes']['children']['equipment_typeC']['hosts']
 # Logins
 logins_conf = YAML.load_file(File.join(File.dirname(__FILE__),
- '../examples/single_iceberg/inventory/cluster/nodes/logins.yml'))
+ '../examples/' + profile + '/inventory/cluster/nodes/logins.yml'))
 logins = logins_conf['mg_logins']['children']['equipment_typeL']['hosts']
 
 
@@ -61,6 +64,8 @@ Vagrant.configure("2") do |config|
           mgmt.vm.synced_folder File.expand_path(local_bb_repo), "/var/www/html/repositories/centos/8.1/x86_64/bluebanquise", type: "rsync"
         end
 
+        # Copy the inventory and playbooks
+        mgmt.vm.synced_folder '../examples/' + profile, "/vagrant/examples", type: "rsync"
         mgmt.vm.provision "shell", path: "bootstrap-bb.sh"
       end
     end
