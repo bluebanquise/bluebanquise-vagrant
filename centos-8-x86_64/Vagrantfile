@@ -1,7 +1,6 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-ENV['VAGRANT_DEFAULT_PROVIDER'] = 'libvirt'
 
 # Path to the local bluebanquise repository
 local_bb_repo = ENV['VAGRANT_BB_REPO'] || '~/Documents/Lab/bluebanquise'
@@ -41,7 +40,7 @@ Vagrant.configure("2") do |config|
         :libvirt__netmask => "255.255.0.0",
         :libvirt__network_address => "10.10.0.0",
         :libvirt__network_name => management[1]['network_interfaces']['enp0s3']['network'],
-        :mac => management[1]['network_interfaces']['enp0s3']['mac']
+        :mac => (management[1]['network_interfaces']['enp0s3']['mac']).tr(':','')
       mgmt.vm.network :private_network,
         :ip => management[1]['network_interfaces']['ib0']['ip4'],
         :libvirt__dhcp_enabled => false,
@@ -82,7 +81,7 @@ Vagrant.configure("2") do |config|
         :libvirt__netmask => "255.255.0.0",
         :libvirt__network_address => "10.10.0.0",
         :libvirt__network_name => compute[1]['network_interfaces']['enp0s9']['network'],
-        :mac => compute[1]['network_interfaces']['enp0s9']['mac']
+        :mac => (compute[1]['network_interfaces']['enp0s9']['mac']).tr(':','')
       pxeclient.vm.network :private_network,
         :ip => compute[1]['network_interfaces']['ib0']['ip4'],
         :libvirt__dhcp_enabled => false,
@@ -112,7 +111,7 @@ Vagrant.configure("2") do |config|
         :libvirt__netmask => "255.255.0.0",
         :libvirt__network_address => "10.10.0.0",
         :libvirt__network_name => login[1]['network_interfaces']['enp0s3']['network'],
-        :mac => login[1]['network_interfaces']['enp0s3']['mac']
+        :mac => (login[1]['network_interfaces']['enp0s3']['mac']).tr(':','')
       pxeclient.vm.network :private_network,
         :ip => login[1]['network_interfaces']['ib0']['ip4'],
         :libvirt__dhcp_enabled => false,
