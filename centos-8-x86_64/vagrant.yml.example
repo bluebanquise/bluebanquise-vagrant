@@ -1,0 +1,21 @@
+---
+# Define the parameters to use in the Vagrantfile
+#
+
+# config.vm.box
+vm_box: "centos/8"
+
+# Profile (inventory)
+# The profiles must be located in the directory examples
+profile: single_iceberg
+
+# Name of the first management node
+# This node is used to deploy all the other nodes of the cluster
+first_management_node: "management1"
+
+# Provisioning script (config.vm.provision)
+# This script executes on the first management node
+boostrap_script: "bootstrap.sh"
+
+# Path to the ISO to attach to the box
+#os_iso: "~/Documents/Lab/CentOS-8.1.1911-x86_64-dvd1.iso"

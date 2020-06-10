@@ -1,27 +1,26 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
-
-
-# Path to the local bluebanquise repository
-local_bb_repo = ENV['VAGRANT_BB_REPO'] || '~/Documents/Lab/bluebanquise'
-local_centos_iso = ENV['VAGRANT_BB_CENTOS_ISO'] || '~/Documents/Lab/CentOS-8.1.1911-x86_64-dvd1.iso'
-
-# Example profile (inventory + playbooks)
-profile = ENV['VAGRANT_BB_PROFILE'] || 'single_iceberg'
+require 'yaml'
 
 # Read YAML files with box details
-require 'yaml'
+if not File.file?('vagrant.yml')
+  STDERR.puts "Can't find configuration file vagrant.yml"
+end
+settings = YAML.load_file('vagrant.yml')
+
 # Managements
 managements_conf = YAML.load_file(File.join(File.dirname(__FILE__),
- '../examples/' + profile + '/inventory/cluster/nodes/managements.yml'))
+ '../examples/' + settings['profile'] + '/inventory/cluster/nodes/managements.yml'))
 managements = managements_conf['mg_managements']['children']['equipment_typeM']['hosts']
+
 # Computes
 computes_conf = YAML.load_file(File.join(File.dirname(__FILE__),
- '../examples/' + profile + '/inventory/cluster/nodes/computes.yml'))
+ '../examples/' + settings['profile'] + '/inventory/cluster/nodes/computes.yml'))
 computes = computes_conf['mg_computes']['children']['equipment_typeC']['hosts']
+
 # Logins
 logins_conf = YAML.load_file(File.join(File.dirname(__FILE__),
- '../examples/' + profile + '/inventory/cluster/nodes/logins.yml'))
+ '../examples/' + settings['profile'] + '/inventory/cluster/nodes/logins.yml'))
 logins = logins_conf['mg_logins']['children']['equipment_typeL']['hosts']
 
 
@@ -31,7 +30,7 @@ Vagrant.configure("2") do |config|
   managements.each do |management|
     config.vm.define management[0], primary: true do |mgmt|
       mgmt.vm.hostname = management[0]
-      mgmt.vm.box = "centos/8"
+      mgmt.vm.box = settings['vm_box']
       mgmt.vm.box_check_update = false
       mgmt.vm.network :private_network,
         :ip => management[1]['network_interfaces']['enp0s3']['ip4'],
@@ -52,20 +51,21 @@ Vagrant.configure("2") do |config|
         domain.cpus = 2
         domain.machine_virtual_size = 25 # GB
         domain.memory = 2048
-        domain.storage :file, :device => :cdrom, :path => File.expand_path(local_centos_iso)
-        domain.storage_pool_name = "lab"
+        if settings['os_iso']
+          domain.storage :file, :device => :cdrom, :path => File.expand_path(settings['os_iso'])
+        end
+        if settings['storage_pool_name']
+          domain.storage_pool_name = settings['storage_pool_name']
+        end
       end
 
       # Bootstrap the first management node only
-      if management[0] == "management1"
-        # If a local bluebanquise repository is found, copy it to the mgmt host
-        if Dir.exist?(File.expand_path(local_bb_repo))
-          mgmt.vm.synced_folder File.expand_path(local_bb_repo), "/var/www/html/repositories/centos/8.1/x86_64/bluebanquise", type: "rsync"
-        end
-
+      if management[0] == settings['first_management_node']
         # Copy the inventory and playbooks
-        mgmt.vm.synced_folder '../examples/' + profile, "/vagrant/examples", type: "rsync"
-        mgmt.vm.provision "shell", path: "bootstrap-bb.sh"
+        mgmt.vm.synced_folder '../examples/' + settings['profile'], "/vagrant/examples", type: "rsync"
+        if settings['boostrap_script']
+          mgmt.vm.provision "shell", path: settings['boostrap_script']
+        end
       end
     end
   end
@@ -96,7 +96,9 @@ Vagrant.configure("2") do |config|
         domain.memory = 2048
         domain.mgmt_attach = false
         domain.storage :file, :size => '5G', :type => 'qcow2'
-        domain.storage_pool_name = "lab"
+        if settings['storage_pool_name']
+          domain.storage_pool_name = settings['storage_pool_name']
+        end
       end
     end
   end
@@ -125,7 +127,9 @@ Vagrant.configure("2") do |config|
         domain.cpus = 2
         domain.memory = 2048
         domain.storage :file, :size => '5G', :type => 'qcow2'
-        domain.storage_pool_name = "lab"
+        if settings['storage_pool_name']
+          domain.storage_pool_name = settings['storage_pool_name']
+        end
       end
     end
   end
