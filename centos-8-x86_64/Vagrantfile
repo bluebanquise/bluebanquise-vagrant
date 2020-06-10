@@ -47,6 +47,7 @@ Vagrant.configure("2") do |config|
         :libvirt__netmask => "255.255.0.0",
         :libvirt__network_address => "10.20.0.0",
         :libvirt__network_name => management[1]['network_interfaces']['ib0']['network']
+
       mgmt.vm.provider :libvirt do |domain|
         domain.cpus = 2
         domain.machine_virtual_size = 25 # GB
@@ -56,6 +57,15 @@ Vagrant.configure("2") do |config|
         end
         if settings['storage_pool_name']
           domain.storage_pool_name = settings['storage_pool_name']
+        end
+      end
+      mgmt.vm.provider :virtualbox do |domain|
+        domain.cpus = 2
+        domain.memory = 2048
+        if settings['os_iso']
+          domain.customize ["storageattach", :id, "--storagectl", "IDE", "--port", "1", "--device", "1", "--type", "dvddrive", "--medium", settings['os_iso']]
+          # Ensure the VM will boot on drive, not on dvd
+          domain.customize ["modifyvm", :id, "--boot1", "disk"]
         end
       end
 
