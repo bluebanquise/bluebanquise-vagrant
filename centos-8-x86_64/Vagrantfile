@@ -33,20 +33,20 @@ Vagrant.configure("2") do |config|
       mgmt.vm.box = settings['vm_box']
       mgmt.vm.box_check_update = false
       mgmt.vm.network :private_network,
-        :ip => management[1]['network_interfaces']['enp0s3']['ip4'],
+        :ip => management[1]['network_interfaces']['eth1']['ip4'],
         :libvirt__dhcp_enabled => false,
         :libvirt__forward_mode => "veryisolated",
         :libvirt__netmask => "255.255.0.0",
         :libvirt__network_address => "10.10.0.0",
-        :libvirt__network_name => management[1]['network_interfaces']['enp0s3']['network'],
-        :mac => (management[1]['network_interfaces']['enp0s3']['mac']).tr(':','')
+        :libvirt__network_name => management[1]['network_interfaces']['eth1']['network'],
+        :mac => (management[1]['network_interfaces']['eth1']['mac']).tr(':','')
       mgmt.vm.network :private_network,
-        :ip => management[1]['network_interfaces']['ib0']['ip4'],
+        :ip => management[1]['network_interfaces']['eth2']['ip4'],
         :libvirt__dhcp_enabled => false,
         :libvirt__forward_mode => "veryisolated",
         :libvirt__netmask => "255.255.0.0",
         :libvirt__network_address => "10.20.0.0",
-        :libvirt__network_name => management[1]['network_interfaces']['ib0']['network']
+        :libvirt__network_name => management[1]['network_interfaces']['eth2']['network']
 
       mgmt.vm.provider :libvirt do |domain|
         domain.cpus = 2
@@ -85,20 +85,20 @@ Vagrant.configure("2") do |config|
   computes.each do |compute|
     config.vm.define compute[0] do |pxeclient|
       pxeclient.vm.network :private_network,
-        :ip => compute[1]['network_interfaces']['enp0s9']['ip4'],
+        :ip => compute[1]['network_interfaces']['ens5']['ip4'],
         :libvirt__dhcp_enabled => false,
         :libvirt__forward_mode => "veryisolated",
         :libvirt__netmask => "255.255.0.0",
         :libvirt__network_address => "10.10.0.0",
-        :libvirt__network_name => compute[1]['network_interfaces']['enp0s9']['network'],
-        :mac => (compute[1]['network_interfaces']['enp0s9']['mac']).tr(':','')
+        :libvirt__network_name => compute[1]['network_interfaces']['ens5']['network'],
+        :mac => (compute[1]['network_interfaces']['ens5']['mac']).tr(':','')
       pxeclient.vm.network :private_network,
-        :ip => compute[1]['network_interfaces']['ib0']['ip4'],
+        :ip => compute[1]['network_interfaces']['ens6']['ip4'],
         :libvirt__dhcp_enabled => false,
         :libvirt__forward_mode => "veryisolated",
         :libvirt__netmask => "255.255.0.0",
         :libvirt__network_address => "10.20.0.0",
-        :libvirt__network_name => compute[1]['network_interfaces']['ib0']['network']
+        :libvirt__network_name => compute[1]['network_interfaces']['ens6']['network']
       pxeclient.vm.provider :libvirt do |domain|
         domain.boot 'network'
         domain.boot 'hd'
@@ -117,20 +117,20 @@ Vagrant.configure("2") do |config|
   logins.each do |login|
     config.vm.define login[0] do |pxeclient|
       pxeclient.vm.network :private_network,
-        :ip => login[1]['network_interfaces']['enp0s3']['ip4'],
+        :ip => login[1]['network_interfaces']['ens6']['ip4'],
         :libvirt__dhcp_enabled => false,
         :libvirt__forward_mode => "veryisolated",
         :libvirt__netmask => "255.255.0.0",
         :libvirt__network_address => "10.10.0.0",
-        :libvirt__network_name => login[1]['network_interfaces']['enp0s3']['network'],
-        :mac => (login[1]['network_interfaces']['enp0s3']['mac']).tr(':','')
+        :libvirt__network_name => login[1]['network_interfaces']['ens6']['network'],
+        :mac => (login[1]['network_interfaces']['ens6']['mac']).tr(':','')
       pxeclient.vm.network :private_network,
-        :ip => login[1]['network_interfaces']['ib0']['ip4'],
+        :ip => login[1]['network_interfaces']['ens7']['ip4'],
         :libvirt__dhcp_enabled => false,
         :libvirt__forward_mode => "veryisolated",
         :libvirt__netmask => "255.255.0.0",
         :libvirt__network_address => "10.20.0.0",
-        :libvirt__network_name => login[1]['network_interfaces']['ib0']['network']
+        :libvirt__network_name => login[1]['network_interfaces']['ens7']['network']
       pxeclient.vm.provider :libvirt do |domain|
         domain.boot 'network'
         domain.boot 'hd'
