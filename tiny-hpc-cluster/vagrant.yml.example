@@ -7,9 +7,9 @@ vm_box: "centos/8"
 
 # Profile (inventory)
 # The profiles must be located in the directory examples
-profile: single_iceberg
+profile: "single_iceberg"
 
-# Name of the first management node
+# Name of the first management node in the inventory
 # This node is used to deploy all the other nodes of the cluster
 first_management_node: "management1"
 
@@ -18,4 +18,8 @@ first_management_node: "management1"
 boostrap_script: "bootstrap.sh"
 
 # Path to the ISO to attach to the box
-#os_iso: "~/Documents/Lab/CentOS-8.1.1911-x86_64-dvd1.iso"
+# os_iso: "~/Documents/Lab/CentOS-8.1.1911-x86_64-dvd1.iso"
+
+# Libvirt's storage pool name
+# Allow to use a dedicated pool to store the virtual disks
+# storage_pool_name: "lab"
