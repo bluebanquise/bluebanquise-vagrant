@@ -28,7 +28,7 @@ fi
 /usr/sbin/restorecon -Rv /var/www/html/repositories/${DISTRIBUTION}/${MINOR_RELEASE}/${ARCH}/bluebanquise
 
 # Copy the inventory
-/usr/bin/cp -a /vagrant/examples/* /etc/bluebanquise/
+/usr/bin/cp -a /vagrant/profiles/* /etc/bluebanquise/
 
 # Create software share for NFS
 /usr/bin/mkdir -p /opt/softwares

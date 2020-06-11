@@ -6,7 +6,6 @@
 vm_box: "centos/8"
 
 # Profile (inventory)
-# The profiles must be located in the directory examples
 profile: "single_iceberg"
 
 # Name of the first management node in the inventory
