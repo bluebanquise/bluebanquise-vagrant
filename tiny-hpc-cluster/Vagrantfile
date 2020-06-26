@@ -71,6 +71,32 @@ Vagrant.configure("2") do |config|
           # Ensure the VM will boot on drive, not on dvd
           domain.customize ["modifyvm", :id, "--boot1", "disk"]
         end
+
+        # Add shared drives
+        unless settings['mgmt_shared_drives'].nil?
+          # Attach a SATA storage controller
+          domain.customize ['storagectl', :id, '--name', 'SATA', \
+                            '--add', 'sata', '--controller', 'IntelAhci', \
+                            '--hostiocache', 'off']
+
+          # Create and attach the drives
+          (1..settings['mgmt_shared_drives']).each do |n|
+            drive = 'drives/mgmt_shared' + n.to_s() + '.vdi'
+
+            if management[0] == settings['first_management_node']
+              unless File.exist?(drive)
+                 domain.customize ['createmedium', 'disk', \
+                                   '--filename', drive, '--variant', 'Fixed', \
+                                   '--size', settings['mgmt_drive_size']]
+                 domain.customize ['modifymedium', 'disk', drive, \
+                                   '--type', 'shareable']
+              end
+            end
+
+            domain.customize ['storageattach', :id, '--storagectl', 'SATA', \
+                              '--port', n-1, '--type', 'hdd', '--medium', drive]
+          end
+        end
       end
 
       # Bootstrap the first management node only

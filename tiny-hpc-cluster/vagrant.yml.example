@@ -22,3 +22,10 @@ boostrap_script: "bootstrap.sh"
 # Libvirt's storage pool name
 # Allow to use a dedicated pool to store the virtual disks
 # storage_pool_name: "lab"
+
+# Number of storage drives shared between management nodes
+# mgmt_shared_drives: 6
+
+# Size of the shared drives (in MB units)
+# Require mgmt_shared_drives
+# mgmt_drive_size: 1024
