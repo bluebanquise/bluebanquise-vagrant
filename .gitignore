@@ -4,3 +4,5 @@
 */.vagrant/*
 ### Vagrant Patch ###
 *.box
+# Ignore authorized_keys in environments
+*/authorized_keys
