@@ -1,6 +1,7 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 require 'yaml'
+require 'vagrant/util/keypair'
 
 # Read YAML files with box details
 if not File.file?('vagrant.yml')
@@ -23,6 +24,17 @@ logins_conf = YAML.load_file(File.join(File.dirname(__FILE__),
  '../profiles/' + settings['profile'] + '/inventory/cluster/nodes/logins.yml'))
 logins = logins_conf['mg_logins']['children']['equipment_typeL']['hosts']
 
+# Create our own SSH key pair for root
+ssh_key_path = File.join('.vagrant', 'ssh')
+Dir.mkdir(ssh_key_path) unless Dir.exist?(ssh_key_path)
+private_rsa_key = File.join(ssh_key_path, 'id_rsa')
+public_rsa_key = File.join(ssh_key_path, 'id_rsa.pub')
+
+$copy_auth_key = <<-SCRIPT
+  echo "Install /root/.ssh/authorized_keys"
+  test -d /root/.ssh || mkdir -m 700 /root/.ssh/
+  cp /vagrant/authorized_keys /root/.ssh/
+SCRIPT
 
 Vagrant.configure("2") do |config|
 
@@ -117,6 +129,19 @@ Vagrant.configure("2") do |config|
 
       # Bootstrap the first management node only
       if management[0] == settings['first_management_node']
+        unless File.exist?(private_rsa_key)
+          _pub, priv, openssh = Vagrant::Util::Keypair.create
+          File.write(private_rsa_key, priv)
+          File.write(public_rsa_key, openssh)
+          File.write('authorized_keys', openssh)
+        end
+
+        # Copy the ssh key pair
+        mgmt.vm.synced_folder File.join('.vagrant', 'ssh'), '/root/.ssh/',
+          type: 'rsync', rsync__chown: false,
+          rsync__args: ['--verbose', '--archive', '--delete',
+                        '--chmod=D700,F600', '--chown=root:root', '-z']
+
         # Copy the inventory and playbooks
         mgmt.vm.synced_folder File.join('..', 'profiles', settings['profile']),
           '/home/vagrant/profiles', type: 'rsync'
@@ -125,6 +150,9 @@ Vagrant.configure("2") do |config|
           mgmt.vm.provision "shell", path: settings['boostrap_script']
         end
       end
+
+      # Copy the authorized_keys
+      mgmt.vm.provision "shell", inline: $copy_auth_key
     end
   end
 

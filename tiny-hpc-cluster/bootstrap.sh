@@ -33,10 +33,6 @@ fi
 # Create software share for NFS
 /usr/bin/mkdir -p /opt/softwares
 
-echo "Generate SSH key pairs"
-/usr/bin/ssh-keygen -f /root/.ssh/id_rsa -N ""
-/usr/bin/cp /root/.ssh/id_rsa.pub /root/.ssh/authorized_keys
-
 # Copy public key of the mgmt to the inventory
 /usr/bin/sed -i -e "s#- ssh-rsa.*#- $(cat /root/.ssh/authorized_keys)#" \
   /etc/bluebanquise/inventory/group_vars/all/all_equipments/authentication.yml
