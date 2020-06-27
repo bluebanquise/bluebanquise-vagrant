@@ -23,12 +23,12 @@ echo "Setup the simple_cluster environment"
 
 # Download bluebanquise repository if we don't have a local copy
 if [[ ! -d /var/www/html/repositories/${DISTRIBUTION}/${MINOR_RELEASE}/${ARCH}/bluebanquise/ ]]; then
-    (cd /var/www/html/repositories/${DISTRIBUTION}/${MINOR_RELEASE}/${ARCH}/ && /usr/bin/wget -rkp -l2 -np -nH -R "index.html*" -R "*.gif" --cut-dirs=3 https://bluebanquise.com/repository/el${MAJOR_RELEASE}/${ARCH}/bluebanquise/)
+    (cd /var/www/html/repositories/${DISTRIBUTION}/${MINOR_RELEASE}/${ARCH}/ && /usr/bin/wget -q -rkp -l2 -np -nH -R "index.html*" -R "*.gif" --cut-dirs=3 https://bluebanquise.com/repository/el${MAJOR_RELEASE}/${ARCH}/bluebanquise/)
 fi
 /usr/sbin/restorecon -Rv /var/www/html/repositories/${DISTRIBUTION}/${MINOR_RELEASE}/${ARCH}/bluebanquise
 
 # Copy the inventory
-/usr/bin/cp -a /vagrant/profiles/* /etc/bluebanquise/
+/usr/bin/cp -a /home/vagrant/profiles/* /etc/bluebanquise/
 
 # Create software share for NFS
 /usr/bin/mkdir -p /opt/softwares
