@@ -16,4 +16,17 @@ mg_managements:
             eth2:
               ip4: 10.20.0.1
               network: interconnect-1
-
+        management2:
+          bmc:
+            name: bmanagement2
+            ip4: 10.10.100.2
+            mac: 08:00:28:dc:f8:f6
+            network: ice1-1
+          network_interfaces:
+            eth1:
+              ip4: 10.10.0.2
+              mac: 08:00:28:dc:f8:f5
+              network: ice1-1
+            eth2:
+              ip4: 10.20.0.2
+              network: interconnect-1

@@ -1,6 +1,6 @@
 This example is made of:
 
- * 1 management node
+ * 2 management nodes
  * 1 login node
  * 4 computes nodes
 

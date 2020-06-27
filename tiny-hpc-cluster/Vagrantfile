@@ -52,6 +52,7 @@ Vagrant.configure("2") do |config|
         :virtualbox__netmask => "255.255.0.0",
         :virtualbox__intnet => true
 
+      ## LIBVIRT PROVIDER ##
       mgmt.vm.provider :libvirt do |domain|
         domain.cpus = 2
         domain.machine_virtual_size = 25 # GB
@@ -62,7 +63,20 @@ Vagrant.configure("2") do |config|
         if settings['storage_pool_name']
           domain.storage_pool_name = settings['storage_pool_name']
         end
+
+        # Add shared drives
+        unless settings['mgmt_shared_drives'].nil?
+          # Create and attach the drives
+          (1..settings['mgmt_shared_drives']).each do |n|
+            drive = File.basename(Dir.getwd) + '_mgmt_shared' + n.to_s() + '.raw'
+            domain.storage :file, :path => drive, \
+              :size => settings['mgmt_drive_size'].to_s + 'M', \
+              :type => 'raw', :shareable => true, :cache => 'directsync'
+          end
+        end
       end
+
+      ## VIRTUALBOX PROVIDER ##
       mgmt.vm.provider :virtualbox do |domain|
         domain.cpus = 2
         domain.memory = 2048
