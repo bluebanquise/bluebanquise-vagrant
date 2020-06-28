@@ -136,11 +136,12 @@ Vagrant.configure("2") do |config|
           File.write('authorized_keys', openssh)
         end
 
-        # Copy the ssh key pair
+        # Copy the ssh key pair and authorized_keys
         mgmt.vm.synced_folder File.join('.vagrant', 'ssh'), '/root/.ssh/',
           type: 'rsync', rsync__chown: false,
           rsync__args: ['--verbose', '--archive', '--delete',
                         '--chmod=D700,F600', '--chown=root:root', '-z']
+        mgmt.vm.provision "shell", inline: $copy_auth_key
 
         # Copy the inventory and playbooks
         mgmt.vm.synced_folder File.join('..', 'profiles', settings['profile']),
@@ -149,10 +150,10 @@ Vagrant.configure("2") do |config|
         if settings['boostrap_script']
           mgmt.vm.provision "shell", path: settings['boostrap_script']
         end
+      else
+        # Copy the authorized_keys
+        mgmt.vm.provision "shell", inline: $copy_auth_key
       end
-
-      # Copy the authorized_keys
-      mgmt.vm.provision "shell", inline: $copy_auth_key
     end
   end
 
