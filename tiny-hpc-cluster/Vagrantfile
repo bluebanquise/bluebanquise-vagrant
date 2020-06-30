@@ -29,11 +29,12 @@ ssh_key_path = File.join('.vagrant', 'ssh')
 Dir.mkdir(ssh_key_path) unless Dir.exist?(ssh_key_path)
 private_rsa_key = File.join(ssh_key_path, 'id_rsa')
 public_rsa_key = File.join(ssh_key_path, 'id_rsa.pub')
+authorized_keys = File.join(ssh_key_path, 'authorized_keys')
 
 $copy_auth_key = <<-SCRIPT
   echo "Install /root/.ssh/authorized_keys"
   test -d /root/.ssh || mkdir -m 700 /root/.ssh/
-  cp /vagrant/authorized_keys /root/.ssh/
+  cp /home/vagrant/authorized_keys /root/.ssh/
 SCRIPT
 
 Vagrant.configure("2") do |config|
@@ -129,11 +130,12 @@ Vagrant.configure("2") do |config|
 
       # Bootstrap the first management node only
       if management[0] == settings['first_management_node']
-        unless File.exist?(private_rsa_key)
+        unless File.exist?(private_rsa_key) and File.exist?(public_rsa_key) \
+               and File.exist?(authorized_keys)
           _pub, priv, openssh = Vagrant::Util::Keypair.create
           File.write(private_rsa_key, priv)
           File.write(public_rsa_key, openssh)
-          File.write('authorized_keys', openssh)
+          File.write(authorized_keys, openssh)
         end
 
         # Copy the ssh key pair and authorized_keys
@@ -141,7 +143,6 @@ Vagrant.configure("2") do |config|
           type: 'rsync', rsync__chown: false,
           rsync__args: ['--verbose', '--archive', '--delete',
                         '--chmod=D700,F600', '--chown=root:root', '-z']
-        mgmt.vm.provision "shell", inline: $copy_auth_key
 
         # Copy the inventory and playbooks
         mgmt.vm.synced_folder File.join('..', 'profiles', settings['profile']),
@@ -152,6 +153,7 @@ Vagrant.configure("2") do |config|
         end
       else
         # Copy the authorized_keys
+        mgmt.vm.provision "file", source: '.vagrant/ssh/authorized_keys', destination: '/home/vagrant/'
         mgmt.vm.provision "shell", inline: $copy_auth_key
       end
     end
