@@ -49,24 +49,24 @@ Vagrant.configure("2") do |config|
       mgmt.vm.box = settings['vm_box']
       mgmt.vm.box_check_update = false
       mgmt.vm.network :private_network,
-        :ip => management[1]['network_interfaces']['eth1']['ip4'],
-        :mac => (management[1]['network_interfaces']['eth1']['mac']).tr(':',''),
+        :ip => management[1]['network_interfaces'][0]['ip4'],
+        :mac => (management[1]['network_interfaces'][0]['mac']).tr(':',''),
         :libvirt__dhcp_enabled => false,
         :libvirt__forward_mode => "veryisolated",
         :libvirt__netmask => "255.255.0.0",
         :libvirt__network_address => "10.10.0.0",
         :libvirt__network_name => network_prefix + '_' \
-          + management[1]['network_interfaces']['eth1']['network'],
+          + management[1]['network_interfaces'][0]['network'],
         :virtualbox__netmask => "255.255.0.0",
         :virtualbox__intnet => true
       mgmt.vm.network :private_network,
-        :ip => management[1]['network_interfaces']['eth2']['ip4'],
+        :ip => management[1]['network_interfaces'][1]['ip4'],
         :libvirt__dhcp_enabled => false,
         :libvirt__forward_mode => "veryisolated",
         :libvirt__netmask => "255.255.0.0",
         :libvirt__network_address => "10.20.0.0",
         :libvirt__network_name => network_prefix + '_' \
-          + management[1]['network_interfaces']['eth2']['network'],
+          + management[1]['network_interfaces'][1]['network'],
         :virtualbox__netmask => "255.255.0.0",
         :virtualbox__intnet => true
 
@@ -172,23 +172,23 @@ Vagrant.configure("2") do |config|
   computes.each do |compute|
     config.vm.define compute[0] do |pxeclient|
       pxeclient.vm.network :private_network,
-        :ip => compute[1]['network_interfaces']['ens5']['ip4'],
-        :mac => (compute[1]['network_interfaces']['ens5']['mac']).tr(':',''),
+        :ip => compute[1]['network_interfaces'][0]['ip4'],
+        :mac => (compute[1]['network_interfaces'][0]['mac']).tr(':',''),
         :libvirt__dhcp_enabled => false,
         :libvirt__forward_mode => "veryisolated",
         :libvirt__netmask => "255.255.0.0",
         :libvirt__network_address => "10.10.0.0",
         :libvirt__network_name => network_prefix + '_' \
-          + compute[1]['network_interfaces']['ens5']['network'],
+          + compute[1]['network_interfaces'][0]['network'],
         :virtualbox__intnet => true
       pxeclient.vm.network :private_network,
-        :ip => compute[1]['network_interfaces']['ens6']['ip4'],
+        :ip => compute[1]['network_interfaces'][1]['ip4'],
         :libvirt__dhcp_enabled => false,
         :libvirt__forward_mode => "veryisolated",
         :libvirt__netmask => "255.255.0.0",
         :libvirt__network_address => "10.20.0.0",
         :libvirt__network_name => network_prefix + '_' \
-          + compute[1]['network_interfaces']['ens6']['network'],
+          + compute[1]['network_interfaces'][1]['network'],
         :virtualbox__intnet => true
       pxeclient.vm.provider :libvirt do |domain|
         domain.boot 'network'
@@ -210,7 +210,7 @@ Vagrant.configure("2") do |config|
         domain.memory = 2048
         # Ensure the VM will boot on network first
         domain.customize ["modifyvm", :id, "--boot1", "net"]
-        # nic1 is NAT used by Vagrant, nic2 is 'ens5' above. Boot with nic2.
+        # nic1 is NAT used by Vagrant, nic2 is network interface 0 above. Boot with nic2.
         domain.customize ["modifyvm", :id, "--nicbootprio2", "1"]
       end
     end
@@ -220,23 +220,23 @@ Vagrant.configure("2") do |config|
   logins.each do |login|
     config.vm.define login[0] do |pxeclient|
       pxeclient.vm.network :private_network,
-        :ip => login[1]['network_interfaces']['ens6']['ip4'],
-        :mac => (login[1]['network_interfaces']['ens6']['mac']).tr(':',''),
+        :ip => login[1]['network_interfaces'][0]['ip4'],
+        :mac => (login[1]['network_interfaces'][0]['mac']).tr(':',''),
         :libvirt__dhcp_enabled => false,
         :libvirt__forward_mode => "veryisolated",
         :libvirt__netmask => "255.255.0.0",
         :libvirt__network_address => "10.10.0.0",
         :libvirt__network_name => network_prefix + '_' \
-          + login[1]['network_interfaces']['ens6']['network'],
+          + login[1]['network_interfaces'][0]['network'],
         :virtualbox__intnet => true
       pxeclient.vm.network :private_network,
-        :ip => login[1]['network_interfaces']['ens7']['ip4'],
+        :ip => login[1]['network_interfaces'][1]['ip4'],
         :libvirt__dhcp_enabled => false,
         :libvirt__forward_mode => "veryisolated",
         :libvirt__netmask => "255.255.0.0",
         :libvirt__network_address => "10.20.0.0",
         :libvirt__network_name => network_prefix + '_' \
-          + login[1]['network_interfaces']['ens7']['network'],
+          + login[1]['network_interfaces'][1]['network'],
         :virtualbox__intnet => true
       pxeclient.vm.provider :libvirt do |domain|
         domain.boot 'network'
@@ -257,7 +257,7 @@ Vagrant.configure("2") do |config|
         domain.memory = 2048
         # Ensure the VM will boot on network first
         domain.customize ["modifyvm", :id, "--boot1", "net"]
-        # nic1 is NAT used by Vagrant, nic2 is 'ens6' above. Boot with nic2.
+        # nic1 is NAT used by Vagrant, nic2 is network interface 0 above. Boot with nic2.
         domain.customize ["modifyvm", :id, "--nicbootprio2", "1"]
       end
     end
