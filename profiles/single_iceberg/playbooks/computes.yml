@@ -1,6 +1,6 @@
 ---
-- name: computes
-  hosts: "{{ target }}"
+- name: computes playbook
+  hosts: "mg_computes"
   roles:
 
     - role: set_hostname

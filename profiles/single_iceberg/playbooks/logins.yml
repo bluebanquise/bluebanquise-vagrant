@@ -1,6 +1,6 @@
 ---
-- name: login1
-  hosts: "{{ target | default('login1') }}"
+- name: logins playbook
+  hosts: "mg_logins"
   roles:
 
     - role: set_hostname
