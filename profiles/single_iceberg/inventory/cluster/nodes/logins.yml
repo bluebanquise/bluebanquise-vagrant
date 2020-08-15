@@ -9,11 +9,10 @@ mg_logins:
             mac: 08:00:27:dc:f8:a7
             network: ice1-1
           network_interfaces:
-            ens6:
+            - interface: ens6
               ip4: 10.10.2.1
               mac: 08:00:27:dc:f8:a5
               network: ice1-1
-            ens7:
+            - interface: ens7
               ip4: 10.20.2.1
               network: interconnect-1
-
