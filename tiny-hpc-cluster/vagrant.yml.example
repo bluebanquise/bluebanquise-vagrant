@@ -29,3 +29,6 @@ boostrap_script: "bootstrap.sh"
 # Size of the shared drives (in MB units)
 # Require mgmt_shared_drives
 # mgmt_drive_size: 1024
+
+# Default prefix for guest name (libvirt, see domain.default_prefix)
+# default_prefix: tiny-hpc-cluster
