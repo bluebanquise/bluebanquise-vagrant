@@ -37,6 +37,9 @@ $copy_auth_key = <<-SCRIPT
   cp /home/vagrant/authorized_keys /root/.ssh/
 SCRIPT
 
+# Define network prefix. Use same prefix than for VM guests.
+network_prefix = settings['default_prefix']? settings['default_prefix'] : File.basename(Dir.getwd)
+
 Vagrant.configure("2") do |config|
 
   ##### DEFINE MGMT VM #####
@@ -52,7 +55,8 @@ Vagrant.configure("2") do |config|
         :libvirt__forward_mode => "veryisolated",
         :libvirt__netmask => "255.255.0.0",
         :libvirt__network_address => "10.10.0.0",
-        :libvirt__network_name => management[1]['network_interfaces']['eth1']['network'],
+        :libvirt__network_name => network_prefix + '_' \
+          + management[1]['network_interfaces']['eth1']['network'],
         :virtualbox__netmask => "255.255.0.0",
         :virtualbox__intnet => true
       mgmt.vm.network :private_network,
@@ -61,7 +65,8 @@ Vagrant.configure("2") do |config|
         :libvirt__forward_mode => "veryisolated",
         :libvirt__netmask => "255.255.0.0",
         :libvirt__network_address => "10.20.0.0",
-        :libvirt__network_name => management[1]['network_interfaces']['eth2']['network'],
+        :libvirt__network_name => network_prefix + '_' \
+          + management[1]['network_interfaces']['eth2']['network'],
         :virtualbox__netmask => "255.255.0.0",
         :virtualbox__intnet => true
 
@@ -173,7 +178,8 @@ Vagrant.configure("2") do |config|
         :libvirt__forward_mode => "veryisolated",
         :libvirt__netmask => "255.255.0.0",
         :libvirt__network_address => "10.10.0.0",
-        :libvirt__network_name => compute[1]['network_interfaces']['ens5']['network'],
+        :libvirt__network_name => network_prefix + '_' \
+          + compute[1]['network_interfaces']['ens5']['network'],
         :virtualbox__intnet => true
       pxeclient.vm.network :private_network,
         :ip => compute[1]['network_interfaces']['ens6']['ip4'],
@@ -181,7 +187,8 @@ Vagrant.configure("2") do |config|
         :libvirt__forward_mode => "veryisolated",
         :libvirt__netmask => "255.255.0.0",
         :libvirt__network_address => "10.20.0.0",
-        :libvirt__network_name => compute[1]['network_interfaces']['ens6']['network'],
+        :libvirt__network_name => network_prefix + '_' \
+          + compute[1]['network_interfaces']['ens6']['network'],
         :virtualbox__intnet => true
       pxeclient.vm.provider :libvirt do |domain|
         domain.boot 'network'
@@ -219,7 +226,8 @@ Vagrant.configure("2") do |config|
         :libvirt__forward_mode => "veryisolated",
         :libvirt__netmask => "255.255.0.0",
         :libvirt__network_address => "10.10.0.0",
-        :libvirt__network_name => login[1]['network_interfaces']['ens6']['network'],
+        :libvirt__network_name => network_prefix + '_' \
+          + login[1]['network_interfaces']['ens6']['network'],
         :virtualbox__intnet => true
       pxeclient.vm.network :private_network,
         :ip => login[1]['network_interfaces']['ens7']['ip4'],
@@ -227,7 +235,8 @@ Vagrant.configure("2") do |config|
         :libvirt__forward_mode => "veryisolated",
         :libvirt__netmask => "255.255.0.0",
         :libvirt__network_address => "10.20.0.0",
-        :libvirt__network_name => login[1]['network_interfaces']['ens7']['network'],
+        :libvirt__network_name => network_prefix + '_' \
+          + login[1]['network_interfaces']['ens7']['network'],
         :virtualbox__intnet => true
       pxeclient.vm.provider :libvirt do |domain|
         domain.boot 'network'
