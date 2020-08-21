@@ -1,23 +1,22 @@
-equipment_profile:
+---
+ep_access_control: enforcing
+ep_firewall: true
 
-  access_control: true
-  firewall: true
+ep_console: console=tty0 console=ttyS1,115200n8
+ep_kernel_parameters:
 
-  console: console=tty0 console=ttyS1,115200n8
-  kernel_parameters:
+ep_operating_system:
+  distribution: centos
+  distribution_major_version: 7
+  distribution_version: 7.6
 
-  operating_system:
-    distribution: centos
-    distribution_major_version: 7
-    distribution_version: 7.6
+ep_equipment_type: server
 
-  equipment_type: server
+ep_configuration:
+  keyboard_layout: us
+  system_language: en_US.UTF-8
 
-  configuration:
-    keyboard_layout: us
-    system_language: en_US.UTF-8
-
-  hardware:
-    cpu:
-      architecture: x86_64
+ep_hardware:
+  cpu:
+    architecture: x86_64
 

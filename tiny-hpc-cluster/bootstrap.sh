@@ -35,7 +35,7 @@ fi
 
 # Copy public key of the mgmt to the inventory
 /usr/bin/sed -i -e "s#- ssh-rsa.*#- $(cat /root/.ssh/authorized_keys)#" \
-  /etc/bluebanquise/inventory/group_vars/all/all_equipments/authentication.yml
+  /etc/bluebanquise/inventory/group_vars/all/equipment_all/authentication.yml
 
 echo "Set the distribution release"
 /usr/bin/sed -i -e "s/distribution_major_version: ./distribution_major_version: ${MAJOR_RELEASE}/" \
