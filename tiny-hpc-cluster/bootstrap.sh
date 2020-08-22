@@ -18,14 +18,14 @@ echo "Install BlueBanquise and dependencies"
 
 echo "Setup the simple_cluster environment"
 # os repository
-/usr/bin/mkdir -p /var/www/html/repositories/${DISTRIBUTION}/${MINOR_RELEASE}/${ARCH}/os/
-/usr/bin/mount /dev/cdrom /var/www/html/repositories/${DISTRIBUTION}/${MINOR_RELEASE}/${ARCH}/os/
+/usr/bin/mkdir -p /var/www/html/repositories/${DISTRIBUTION}/${MAJOR_RELEASE}/${ARCH}/os/
+/usr/bin/mount /dev/cdrom /var/www/html/repositories/${DISTRIBUTION}/${MAJOR_RELEASE}/${ARCH}/os/
 
 # Download bluebanquise repository if we don't have a local copy
-if [[ ! -d /var/www/html/repositories/${DISTRIBUTION}/${MINOR_RELEASE}/${ARCH}/bluebanquise/ ]]; then
-    (cd /var/www/html/repositories/${DISTRIBUTION}/${MINOR_RELEASE}/${ARCH}/ && /usr/bin/wget -q -rkp -l2 -np -nH -R "index.html*" -R "*.gif" --cut-dirs=3 https://bluebanquise.com/repository/el${MAJOR_RELEASE}/${ARCH}/bluebanquise/)
+if [[ ! -d /var/www/html/repositories/${DISTRIBUTION}/${MAJOR_RELEASE}/${ARCH}/bluebanquise/ ]]; then
+    (cd /var/www/html/repositories/${DISTRIBUTION}/${MAJOR_RELEASE}/${ARCH}/ && /usr/bin/wget -q -rkp -l2 -np -nH -R "index.html*" -R "*.gif" --cut-dirs=3 https://bluebanquise.com/repository/el${MAJOR_RELEASE}/${ARCH}/bluebanquise/)
 fi
-/usr/sbin/restorecon -Rv /var/www/html/repositories/${DISTRIBUTION}/${MINOR_RELEASE}/${ARCH}/bluebanquise
+/usr/sbin/restorecon -Rv /var/www/html/repositories/${DISTRIBUTION}/${MAJOR_RELEASE}/${ARCH}/bluebanquise
 
 # Copy the inventory
 /usr/bin/cp -a /home/vagrant/profiles/* /etc/bluebanquise/
@@ -39,14 +39,14 @@ fi
 
 echo "Set the distribution release"
 /usr/bin/sed -i -e "s/distribution_major_version: ./distribution_major_version: ${MAJOR_RELEASE}/" \
-                -e "s/distribution_version: .*/distribution_version: ${MINOR_RELEASE}/" \
+                -e "/distribution_version: .*/d" \
                 -e "s/distribution: .*/distribution: ${DISTRIBUTION}/" \
                 /etc/bluebanquise/inventory/group_vars/equipment_typeM/equipment_profile.yml
 /usr/bin/sed -i -e "s/distribution_major_version: ./distribution_major_version: ${MAJOR_RELEASE}/" \
-                -e "s/distribution_version: .*/distribution_version: ${MINOR_RELEASE}/" \
+                -e "/distribution_version: .*/d" \
                 -e "s/distribution: .*/distribution: ${DISTRIBUTION}/" \
                 /etc/bluebanquise/inventory/group_vars/equipment_typeC/equipment_profile.yml
 /usr/bin/sed -i -e "s/distribution_major_version: ./distribution_major_version: ${MAJOR_RELEASE}/" \
-                -e "s/distribution_version: .*/distribution_version: ${MINOR_RELEASE}/" \
+                -e "/distribution_version: .*/d" \
                 -e "s/distribution: .*/distribution: ${DISTRIBUTION}/" \
                 /etc/bluebanquise/inventory/group_vars/equipment_typeL/equipment_profile.yml
