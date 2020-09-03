@@ -2,7 +2,7 @@
 ep_access_control: enforcing
 ep_firewall: true
 
-ep_console: console=tty0 console=ttyS1,115200n8
+ep_console: console=tty0 console=ttyS0,115200n8
 ep_kernel_parameters:
 
 ep_operating_system:
@@ -19,4 +19,3 @@ ep_configuration:
 ep_hardware:
   cpu:
     architecture: x86_64
-

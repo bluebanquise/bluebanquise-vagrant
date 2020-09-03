@@ -2,6 +2,8 @@
 ep_access_control: enforcing
 ep_firewall: false
 
+ep_console: console=tty0 console=ttyS0,115200n8
+
 ep_partitioning: |
   clearpart --all --initlabel
   part /boot --fstype=ext4 --size=1024
