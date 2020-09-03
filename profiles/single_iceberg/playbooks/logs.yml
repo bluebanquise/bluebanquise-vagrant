@@ -1,0 +1,12 @@
+---
+- name: log server playbook
+  hosts: "management1"
+  roles:
+    - role: log_server
+      tags: log_server
+
+- name: log clients playbook
+  hosts: "mg_computes,mg_logins,management2"
+  roles:
+    - role: log_client
+      tags: log_client
