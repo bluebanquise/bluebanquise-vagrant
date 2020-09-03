@@ -1,0 +1,20 @@
+---
+- name: addons roles to run everywhere
+  hosts: "mg_managements,mg_computes,mg_logins"
+  roles:
+    - role: root_password
+      tags: root_password
+
+- name: addons roles to run on management nodes
+  hosts: "mg_managements"
+  roles:
+    - role: clustershell
+      tags: clustershell
+
+- name: addons roles to run on mngt1 only
+  hosts: "management1"
+  roles:
+    - role: conman
+      tags: conman
+    - role: diskless
+      tags: diskless
