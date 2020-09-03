@@ -13,6 +13,8 @@
       tags: repositories_client
     - role: bluebanquise
       tags: bluebanquise
+    - role: firewall
+      tags: firewall
     - role: hosts_file
       tags: hosts_file
     - role: ssh_master
@@ -32,3 +34,7 @@
     - role: nfs_server
       tags: nfs_server
 
+  tasks:
+    - package:
+        name: vim
+        state: present
