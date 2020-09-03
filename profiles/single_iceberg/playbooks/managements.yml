@@ -19,10 +19,10 @@
       tags: ssh_master
     - role: dhcp_server
       tags: dhcp_server
-    - role: dns_server
-      tags: dns_server
+    - role: advanced_dns_server
+      tags: ['dns', 'dns_server']
     - role: dns_client
-      tags: dns_client
+      tags: ['dns', 'dns_client']
     - role: time
       tags: time
       vars:
