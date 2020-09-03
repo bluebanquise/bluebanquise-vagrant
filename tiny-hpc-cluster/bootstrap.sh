@@ -3,8 +3,8 @@
 set -x
 
 echo "Install packages"
-/usr/bin/dnf install epel-release git wget redhat-lsb-core -y
-/usr/bin/dnf install ansible -y
+/usr/bin/yum install epel-release git wget redhat-lsb-core -y
+/usr/bin/yum install ansible -y
 
 DISTRIBUTION=$(lsb_release -is|tr '[:upper:]' '[:lower:]')
 RELEASE=$(lsb_release -rs)
@@ -14,7 +14,7 @@ ARCH=$(uname -i)
 
 echo "Install BlueBanquise and dependencies"
 /usr/bin/git clone https://github.com/bluebanquise/bluebanquise /etc/bluebanquise
-/usr/bin/dnf install clustershell -y
+/usr/bin/yum install clustershell -y
 
 echo "Setup the simple_cluster environment"
 # os repository
