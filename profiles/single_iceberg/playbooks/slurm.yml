@@ -1,0 +1,24 @@
+---
+- name: slurm playbook - controller
+  hosts: "management1"
+  roles:
+    - role: slurm
+      tags: slurm
+      vars:
+        slurm_profile: controller
+
+- name: slurm playbook - computes
+  hosts: "mg_computes"
+  roles:
+    - role: slurm
+      tags: slurm
+      vars:
+        slurm_profile: node
+
+- name: slurm playbook - logins
+  hosts: "mg_logins"
+  roles:
+    - role: slurm
+      tags: slurm
+      vars:
+        slurm_profile: passive

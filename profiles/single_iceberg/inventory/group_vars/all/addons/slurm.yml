@@ -1,0 +1,8 @@
+---
+slurm:
+  slurm_packaging: after_17
+  cluster_name: bluebanquise
+  control_machine: management1
+  #MpiDefault: pmi2 # Optional
+  nodes_equipment_groups:
+    - equipment_typeC
