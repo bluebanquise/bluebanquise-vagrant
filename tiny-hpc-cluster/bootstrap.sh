@@ -13,7 +13,7 @@ MINOR_RELEASE=${RELEASE:0:3}
 ARCH=$(uname -i)
 
 echo "Install BlueBanquise and dependencies"
-/usr/bin/git clone https://github.com/bluebanquise/bluebanquise /etc/bluebanquise
+/usr/bin/git clone https://github.com/bluebanquise/bluebanquise /etc/bluebanquise -b stable-1.3
 /usr/bin/yum install clustershell -y
 
 echo "Setup the simple_cluster environment"
@@ -23,7 +23,7 @@ echo "Setup the simple_cluster environment"
 
 # Download bluebanquise repository if we don't have a local copy
 if [[ ! -d /var/www/html/repositories/${DISTRIBUTION}/${MAJOR_RELEASE}/${ARCH}/bluebanquise/ ]]; then
-    (cd /var/www/html/repositories/${DISTRIBUTION}/${MAJOR_RELEASE}/${ARCH}/ && /usr/bin/wget -q -rkp -l2 -np -nH -R "index.html*" -R "*.gif" --cut-dirs=3 https://bluebanquise.com/repository/el${MAJOR_RELEASE}/${ARCH}/bluebanquise/)
+    (cd /var/www/html/repositories/${DISTRIBUTION}/${MAJOR_RELEASE}/${ARCH}/ && /usr/bin/wget -q -rkp -np -nH -R "index.html*" -R "*.gif" --cut-dirs=5 https://bluebanquise.com/repository/releases/1.3/el${MAJOR_RELEASE}/${ARCH}/bluebanquise/)
 fi
 /usr/sbin/restorecon -Rv /var/www/html/repositories/${DISTRIBUTION}/${MAJOR_RELEASE}/${ARCH}/bluebanquise
 
