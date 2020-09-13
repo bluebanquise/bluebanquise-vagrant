@@ -1,0 +1,10 @@
+---
+monitoring:
+  exporters:
+    node_exporter:
+      package: node_exporter
+      service: node_exporter
+      port: 9100
+  # Define alerts related to selected exporters
+  alerts:
+    Exporter_down:

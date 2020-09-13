@@ -1,0 +1,20 @@
+---
+- name: monitoring server playbook
+  hosts: "management2"
+  vars:
+    prometheus:
+      scrape_interval: 1m
+      evaluation_interval: 2m
+      alertmanager:
+        group_wait: 1m
+        group_interval: 10m
+        repeat_interval: 3h
+  roles:
+    - role: prometheus_server
+      tags: prometheus_server
+
+- name: monitoring clients playbook
+  hosts: "mg_computes,mg_logins,mg_managements"
+  roles:
+    - role: prometheus_client
+      tags: prometheus_client
