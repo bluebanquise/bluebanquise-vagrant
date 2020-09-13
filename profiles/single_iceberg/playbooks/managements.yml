@@ -1,5 +1,11 @@
 ---
 - name: managements playbook
+  hosts: "management1"
+  roles:
+    - role: bluebanquise
+      tags: bluebanquise
+
+- name: managements playbook
   hosts: "mg_managements"
   roles:
 
@@ -11,8 +17,6 @@
       tags: repositories_server
     - role: repositories_client
       tags: repositories_client
-    - role: bluebanquise
-      tags: bluebanquise
     - role: firewall
       tags: firewall
     - role: hosts_file
