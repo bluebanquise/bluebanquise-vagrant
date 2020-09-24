@@ -1,0 +1,297 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+require 'yaml'
+require 'vagrant/util/keypair'
+
+# Read YAML files with box details
+if not File.file?('vagrant.yml')
+  STDERR.puts "Can't find configuration file vagrant.yml"
+end
+settings = YAML.load_file('vagrant.yml')
+
+# Managements
+managements_conf = YAML.load_file(File.join(File.dirname(__FILE__),
+ '../profiles/' + settings['profile'] + '/inventory/cluster/nodes/managements.yml'))
+managements = managements_conf['mg_managements']['children']['equipment_typeM']['hosts']
+
+# Storage servers
+storage_conf = YAML.load_file(File.join(File.dirname(__FILE__),
+ '../profiles/' + settings['profile'] + '/inventory/cluster/nodes/storages.yml'))
+storages = storage_conf['mg_storage']['children']['equipment_typeS']['hosts']
+
+# Clients
+clients_conf = YAML.load_file(File.join(File.dirname(__FILE__),
+ '../profiles/' + settings['profile'] + '/inventory/cluster/nodes/clients.yml'))
+clients = clients_conf['mg_clients']['children']['equipment_typeC']['hosts']
+
+# Create our own SSH key pair for root
+ssh_key_path = File.join('.vagrant', 'ssh')
+Dir.mkdir(ssh_key_path) unless Dir.exist?(ssh_key_path)
+private_rsa_key = File.join(ssh_key_path, 'id_rsa')
+public_rsa_key = File.join(ssh_key_path, 'id_rsa.pub')
+authorized_keys = File.join(ssh_key_path, 'authorized_keys')
+
+$copy_auth_key = <<-SCRIPT
+  echo "Install /root/.ssh/authorized_keys"
+  test -d /root/.ssh || mkdir -m 700 /root/.ssh/
+  cp /home/vagrant/authorized_keys /root/.ssh/
+SCRIPT
+
+# Define network prefix. Use same prefix than for VM guests.
+network_prefix = settings['default_prefix']? settings['default_prefix'] : File.basename(Dir.getwd)
+
+Vagrant.configure("2") do |config|
+
+  ##### DEFINE MGMT VM #####
+  managements.each do |management|
+    config.vm.define management[0], primary: true do |mgmt|
+      mgmt.vm.hostname = management[0]
+      mgmt.vm.box = settings['vm_box']
+      mgmt.vm.box_check_update = false
+      mgmt.vm.network :private_network,
+        :ip => management[1]['network_interfaces'][0]['ip4'],
+        :mac => (management[1]['network_interfaces'][0]['mac']).tr(':',''),
+        :libvirt__dhcp_enabled => false,
+        :libvirt__forward_mode => "veryisolated",
+        :libvirt__netmask => "255.255.0.0",
+        :libvirt__network_address => "10.12.0.0",
+        :libvirt__network_name => network_prefix + '_' \
+          + management[1]['network_interfaces'][0]['network'],
+        :virtualbox__netmask => "255.255.0.0",
+        :virtualbox__intnet => true
+      mgmt.vm.network :private_network,
+        :ip => management[1]['network_interfaces'][1]['ip4'],
+        :libvirt__dhcp_enabled => false,
+        :libvirt__forward_mode => "veryisolated",
+        :libvirt__netmask => "255.255.0.0",
+        :libvirt__network_address => "10.22.0.0",
+        :libvirt__network_name => network_prefix + '_' \
+          + management[1]['network_interfaces'][1]['network'],
+        :virtualbox__netmask => "255.255.0.0",
+        :virtualbox__intnet => true
+
+      ## LIBVIRT PROVIDER ##
+      mgmt.vm.provider :libvirt do |domain|
+        domain.cpus = 2
+        domain.machine_virtual_size = 25 # GB
+        domain.memory = 1024
+        if settings['os_iso']
+          domain.storage :file, :device => :cdrom, :path => File.expand_path(settings['os_iso'])
+        end
+        if settings['storage_pool_name']
+          domain.storage_pool_name = settings['storage_pool_name']
+        end
+        if settings['default_prefix']
+          domain.default_prefix = settings['default_prefix']
+        end
+      end
+
+      ## VIRTUALBOX PROVIDER ##
+      mgmt.vm.provider :virtualbox do |domain|
+        domain.cpus = 2
+        domain.memory = 1024
+        if settings['os_iso']
+          domain.customize ['storageattach', :id, '--storagectl', 'IDE',
+                            '--port', '1', '--type', 'dvddrive',
+                            '--device', '1', '--medium', settings['os_iso']]
+          # Ensure the VM will boot on drive, not on dvd
+          domain.customize ['modifyvm', :id, '--boot1', 'disk']
+        end
+      end
+
+      # Bootstrap the first management node only
+      if management[0] == settings['first_management_node']
+        unless File.exist?(private_rsa_key) and File.exist?(public_rsa_key) \
+               and File.exist?(authorized_keys)
+          _pub, priv, openssh = Vagrant::Util::Keypair.create
+          File.write(private_rsa_key, priv)
+          File.write(public_rsa_key, openssh)
+          File.write(authorized_keys, openssh)
+        end
+
+        # Copy the ssh key pair and authorized_keys
+        mgmt.vm.synced_folder File.join('.vagrant', 'ssh'), '/root/.ssh/',
+          type: 'rsync', rsync__chown: false,
+          rsync__args: ['--verbose', '--archive', '--delete',
+                        '--chmod=D700,F600', '--chown=root:root', '-z']
+
+        # Copy the inventory and playbooks
+        mgmt.vm.synced_folder File.join('..', 'profiles', settings['profile']),
+          '/home/vagrant/profiles', type: 'rsync'
+
+        if settings['boostrap_script']
+          mgmt.vm.provision "shell", path: settings['boostrap_script']
+        end
+      else
+        # Copy the authorized_keys
+        mgmt.vm.provision "file", source: '.vagrant/ssh/authorized_keys', destination: '/home/vagrant/authorized_keys'
+        mgmt.vm.provision "shell", inline: $copy_auth_key
+      end
+    end
+  end
+
+  ##### DEFINE STORAGE VM #####
+  storages.each_with_index do |storage, index|
+    config.vm.define storage[0] do |stocfg|
+      stocfg.vm.hostname = storage[0]
+      if settings['vm_box_storage']
+        stocfg.vm.box = settings['vm_box_storage']
+      else
+        stocfg.vm.box = settings['vm_box']
+      end
+      stocfg.vm.box_check_update = false
+      stocfg.vm.network :private_network,
+        :ip => storage[1]['network_interfaces'][0]['ip4'],
+        :mac => (storage[1]['network_interfaces'][0]['mac']).tr(':',''),
+        :libvirt__dhcp_enabled => false,
+        :libvirt__forward_mode => "veryisolated",
+        :libvirt__netmask => "255.255.0.0",
+        :libvirt__network_address => "10.12.0.0",
+        :libvirt__network_name => network_prefix + '_' \
+          + storage[1]['network_interfaces'][0]['network'],
+        :virtualbox__intnet => true
+      stocfg.vm.network :private_network,
+        :ip => storage[1]['network_interfaces'][1]['ip4'],
+        :libvirt__dhcp_enabled => false,
+        :libvirt__forward_mode => "veryisolated",
+        :libvirt__netmask => "255.255.0.0",
+        :libvirt__network_address => "10.22.0.0",
+        :libvirt__network_name => network_prefix + '_' \
+          + storage[1]['network_interfaces'][1]['network'],
+        :virtualbox__intnet => true
+
+      # Set pair index for shared drives
+      if index.even?
+        pair_index = index / 2
+      else
+        pair_index = (index - 1) / 2
+      end
+
+      ## LIBVIRT PROVIDER ##
+      stocfg.vm.provider :libvirt do |domain|
+        domain.boot 'network'
+        domain.boot 'hd'
+        domain.cpus = 2
+        domain.memory = 1024
+        if settings['storage_pool_name']
+          domain.storage_pool_name = settings['storage_pool_name']
+        end
+        if settings['default_prefix']
+          domain.default_prefix = settings['default_prefix']
+        end
+
+        # Add shared drives per pair of nodes
+        unless settings['shared_drives'].nil?
+          # Create and attach the drives
+          (1..settings['shared_drives']).each do |n|
+            drive = File.basename(Dir.getwd) + '_shared_' + pair_index.to_s() + '_' + n.to_s() + '.raw'
+            domain.storage :file, :path => drive,
+              :size => settings['shared_drive_size'].to_s + 'M',
+              :type => 'raw', :shareable => true, :cache => 'directsync'
+          end
+        end
+      end
+
+      ## VIRTUALBOX PROVIDER ##
+      stocfg.vm.provider :virtualbox do |domain|
+        domain.cpus = 2
+        domain.memory = 1024
+        # Ensure the VM will boot on network first
+        domain.customize ["modifyvm", :id, "--boot1", "net"]
+        # nic1 is NAT used by Vagrant, nic2 is network interface 0 above. Boot with nic2.
+        domain.customize ["modifyvm", :id, "--nicbootprio2", "1"]
+
+        # Add shared drives
+        unless settings['shared_drives'].nil?
+          # Attach a SATA storage controller
+          domain.customize ['storagectl', :id, '--name', 'SATA',
+                            '--add', 'sata', '--controller', 'IntelAhci',
+                            '--hostiocache', 'off']
+
+          # Create and attach the drives
+          (1..settings['shared_drives']).each do |n|
+            drive = '.vagrant/drives/shared_' + pair_index.to_s() + '_' + n.to_s() + '.vdi'
+
+            if index.even?
+              unless File.exist?(drive)
+                 domain.customize ['createmedium', 'disk', '--filename', drive,
+                                   '--variant', 'Fixed', '--size',
+                                   settings['shared_drive_size']]
+                 domain.customize ['modifymedium', 'disk', drive,
+                                   '--type', 'shareable']
+              end
+            end
+
+            domain.customize ['storageattach', :id, '--storagectl', 'SATA',
+                              '--port', n-1, '--type', 'hdd', '--medium', drive]
+          end
+        end
+      end
+
+      # Copy the authorized_keys
+      stocfg.vm.provision "file", source: '.vagrant/ssh/authorized_keys', destination: '/home/vagrant/authorized_keys'
+      stocfg.vm.provision "shell", inline: $copy_auth_key
+    end
+  end
+
+  ##### DEFINE CLIENT VM #####
+  clients.each do |client|
+    config.vm.define client[0] do |clientcfg|
+      clientcfg.vm.hostname = client[0]
+      if settings['vm_box_clients']
+        clientcfg.vm.box = settings['vm_box_clients']
+      else
+        clientcfg.vm.box = settings['vm_box']
+      end
+      clientcfg.vm.box_check_update = false
+      clientcfg.vm.network :private_network,
+        :ip => client[1]['network_interfaces'][0]['ip4'],
+        :mac => (client[1]['network_interfaces'][0]['mac']).tr(':',''),
+        :libvirt__dhcp_enabled => false,
+        :libvirt__forward_mode => "veryisolated",
+        :libvirt__netmask => "255.255.0.0",
+        :libvirt__network_address => "10.12.0.0",
+        :libvirt__network_name => network_prefix + '_' \
+          + client[1]['network_interfaces'][0]['network'],
+        :virtualbox__intnet => true
+      clientcfg.vm.network :private_network,
+        :ip => client[1]['network_interfaces'][1]['ip4'],
+        :libvirt__dhcp_enabled => false,
+        :libvirt__forward_mode => "veryisolated",
+        :libvirt__netmask => "255.255.0.0",
+        :libvirt__network_address => "10.22.0.0",
+        :libvirt__network_name => network_prefix + '_' \
+          + client[1]['network_interfaces'][1]['network'],
+        :virtualbox__intnet => true
+
+      ## LIBVIRT PROVIDER ##
+      clientcfg.vm.provider :libvirt do |domain|
+        domain.boot 'network'
+        domain.boot 'hd'
+        domain.cpus = 2
+        domain.memory = 1024
+        if settings['storage_pool_name']
+          domain.storage_pool_name = settings['storage_pool_name']
+        end
+        if settings['default_prefix']
+          domain.default_prefix = settings['default_prefix']
+        end
+      end
+
+      ## VIRTUALBOX PROVIDER ##
+      clientcfg.vm.provider :virtualbox do |domain|
+        domain.cpus = 2
+        domain.memory = 1024
+        # Ensure the VM will boot on network first
+        domain.customize ["modifyvm", :id, "--boot1", "net"]
+        # nic1 is NAT used by Vagrant, nic2 is network interface 0 above. Boot with nic2.
+        domain.customize ["modifyvm", :id, "--nicbootprio2", "1"]
+      end
+
+      # Copy the authorized_keys
+      clientcfg.vm.provision "file", source: '.vagrant/ssh/authorized_keys', destination: '/home/vagrant/authorized_keys'
+      clientcfg.vm.provision "shell", inline: $copy_auth_key
+    end
+  end
+
+end

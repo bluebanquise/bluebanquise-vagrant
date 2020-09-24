@@ -1,0 +1,20 @@
+---
+ep_access_control: enforcing
+ep_firewall: true
+
+ep_console: console=tty0 console=ttyS0,115200n8
+ep_kernel_parameters:
+
+ep_operating_system:
+  distribution: centos
+  distribution_major_version: 7
+
+ep_equipment_type: server
+
+ep_configuration:
+  keyboard_layout: us
+  system_language: en_US.UTF-8
+
+ep_hardware:
+  cpu:
+    architecture: x86_64

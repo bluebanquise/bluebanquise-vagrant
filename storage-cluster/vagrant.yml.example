@@ -1,0 +1,40 @@
+---
+# Define the parameters to use in the Vagrantfile
+#
+
+# config.vm.box
+vm_box: "centos/8"
+
+# Additional config.vm.box
+# You can specify the vm_box to use for groups storage and clients.
+# Defaults to value of vm_box
+vm_box_storage: "centos/7"
+# vm_box_clients: "centos/7"
+
+# Profile (inventory)
+profile: "lustre"
+
+# Name of the first management node in the inventory
+# This node is used to deploy all the other nodes of the cluster
+first_management_node: "admin"
+
+# Provisioning script (config.vm.provision)
+# This script executes on the first management node
+boostrap_script: "bootstrap.sh"
+
+# Path to the ISO to attach to the box
+# os_iso: "~/Documents/Lab/CentOS-8.1.1911-x86_64-dvd1.iso"
+
+# Libvirt's storage pool name
+# Allow to use a dedicated pool to store the virtual disks
+# storage_pool_name: "lab"
+
+# Number of storage drives shared between each pair of nodes
+shared_drives: 2
+
+# Size of the shared drives (in MB units)
+# Require shared_drives
+shared_drive_size: 1024
+
+# Default prefix for guest name (libvirt, see domain.default_prefix)
+# default_prefix: storage-cluster

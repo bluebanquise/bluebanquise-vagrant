@@ -1,0 +1,21 @@
+---
+- name: storage servers playbook
+  hosts: "mg_storage"
+  roles:
+
+    - role: set_hostname
+      tags: set_hostname
+    - role: repositories_client
+      tags: repositories_client
+    - role: nic
+      tags: nic
+    - role: hosts_file
+      tags: hosts_file
+    - role: firewall
+      tags: firewall
+    - role: dns_client
+      tags: dns_client
+    - role: time
+      tags: time
+      vars:
+        time_profile: client

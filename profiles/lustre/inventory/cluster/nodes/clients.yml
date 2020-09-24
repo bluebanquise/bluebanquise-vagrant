@@ -1,0 +1,23 @@
+---
+mg_clients:
+  children:
+    equipment_typeC:
+      hosts:
+        cli1:
+          network_interfaces:
+            - interface: eth1
+              ip4: 10.12.0.7
+              mac: 08:00:38:63:6c:31
+              network: ice1-1
+            - interface: eth2
+              ip4: 10.22.0.7
+              network: interconnect-1
+        cli2:
+          network_interfaces:
+            - interface: eth1
+              ip4: 10.12.0.8
+              mac: 08:00:38:63:6c:32
+              network: ice1-1
+            - interface: eth2
+              ip4: 10.22.0.8
+              network: interconnect-1

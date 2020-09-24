@@ -1,0 +1,45 @@
+---
+### Network related settings
+
+## DNS
+domain_name: lustre.local
+
+## DHCP
+dhcp_settings:
+  default_lease_time: 600 # Consider to increase once in production
+  max_lease_time: 7200 # Same
+
+## Global network
+global_network_settings:
+  global_network:
+  global_network_group:
+
+## Networks
+networks:
+  ice1-1:
+    subnet: 10.12.0.0
+    prefix: 16
+    netmask: 255.255.0.0
+    broadcast: 10.12.255.255
+    #DELETE## dhcp_unknown_range: 10.12.254.1 10.12.254.254
+    gateway: 10.12.0.1
+    is_in_dhcp: true
+    is_in_dns: true
+    firewall:
+      zone: internal
+    services_ip:
+      pxe_ip: 10.12.0.1
+      dns_ip: 10.12.0.1
+      repository_ip: 10.12.0.1
+      authentication_ip: 10.12.0.1
+      time_ip: 10.12.0.1
+      log_ip: 10.12.0.1
+  interconnect-1:
+    subnet: 10.22.0.0
+    prefix: 16
+    netmask: 255.255.0.0
+    broadcast: 10.22.255.255
+    is_in_dhcp: false
+    is_in_dns: true
+    firewall:
+      zone: trusted

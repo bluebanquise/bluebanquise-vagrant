@@ -1,0 +1,19 @@
+---
+mg_managements:
+  children:
+    equipment_typeM:
+      hosts:
+        admin:
+          bmc:
+            name: badmin
+            ip4: 10.12.100.1
+            mac: 08:00:38:62:6d:31
+            network: ice1-1
+          network_interfaces:
+            - interface: eth1
+              ip4: 10.12.0.1
+              mac: 08:00:38:61:64:31
+              network: ice1-1
+            - interface: eth2
+              ip4: 10.22.0.1
+              network: interconnect-1

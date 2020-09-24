@@ -1,0 +1,25 @@
+---
+ep_access_control: enforcing
+ep_firewall: false
+
+ep_console: console=tty0 console=ttyS0,115200n8
+
+ep_partitioning: |
+  clearpart --all --initlabel
+  part /boot --fstype=xfs --size=512
+  part / --fstype=xfs --size=8000
+  part /home --fstype=xfs --size=2048 --grow
+
+ep_operating_system:
+  distribution: centos
+  distribution_major_version: 8
+
+ep_equipment_type: server
+
+ep_configuration:
+  keyboard_layout: us
+  system_language: en_US.UTF-8
+
+ep_hardware:
+  cpu:
+    architecture: x86_64

@@ -1,0 +1,7 @@
+repositories:
+  - name: lustre-server
+    baseurl: https://downloads.whamcloud.com/public/lustre/latest-release/el7/patchless-ldiskfs-server/
+  - name: lustre-e2fsprogs
+    baseurl: https://downloads.whamcloud.com/public/e2fsprogs/latest/el7/
+  - name: bluebanquise
+    baseurl: https://bluebanquise.com/repository/el7/x86_64/bluebanquise/

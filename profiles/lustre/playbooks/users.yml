@@ -1,0 +1,23 @@
+---
+- name: Create local users
+  hosts: "mg_managements,mg_storage,mg_clients"
+  vars:
+    users_basic:
+      users:
+        - name: joe
+          uid: 5000
+          gid: 5000
+          shell: /bin/bash
+          comment: "John Doe"
+          # password: vagrant
+          password: "$6$4ITHOSy7M5ftIYPX$KLG4w3vc4nqPPWzU7D.6U17vu2uj3q8cog/iECyWTKoMu8LcryNCIWJPHvxlZu2PFKSLozCF.GedFaeXB5LZ/1"
+        - name: jane
+          uid: 5001
+          gid: 5001
+          shell: /bin/bash
+          comment: "Jane Doe"
+          # password: vagrant
+          password: "$6$4ITHOSy7M5ftIYPX$KLG4w3vc4nqPPWzU7D.6U17vu2uj3q8cog/iECyWTKoMu8LcryNCIWJPHvxlZu2PFKSLozCF.GedFaeXB5LZ/1"
+  roles:
+    - role: users_basic
+      tags: users_basic

@@ -1,0 +1,11 @@
+---
+lustre:
+  children:
+    mds:
+      hosts:
+        mds1:
+        mds2:
+    oss:
+      hosts:
+        oss1:
+        oss2:
